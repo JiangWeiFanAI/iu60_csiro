@@ -35,6 +35,8 @@ class Model(nn.Module):
             resume=args.resume,
             cpu=args.cpu
         )
+
+
         if args.print_model: print(self.model)
 
     def forward(self, x, idx_scale):
@@ -94,7 +96,15 @@ class Model(nn.Module):
             kwargs = {'map_location': lambda storage, loc: storage}
         else:
             kwargs = {}
-
+#         pretrained_dict=torch.load('./model/RCAN_BIX4.pt',**kwargs)
+#         model_dict=net.state_dict()
+#         # 1. filter out unnecessary keys
+#         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+#         # 2. overwrite entries in the existing state dict
+#         model_dict.update(pretrained_dict)
+#         self.get_model().load_state_dict(model_dict)
+        
+        
         if resume == -1:
             self.get_model().load_state_dict(
                 torch.load(
