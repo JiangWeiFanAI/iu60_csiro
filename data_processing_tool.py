@@ -57,7 +57,7 @@ prcp_colours = [
 prcp_colormap = matplotlib.colors.ListedColormap(prcp_colours)
 
 def read_barra_data_fc(root_dir,date_time):
-    filename=root_dir+date_time.strftime("%Y%m%d")+".nc"
+    filename=root_dir+(date_time+timedelta(1)).strftime("%Y%m%d")+".nc"
     data = Dataset(filename, 'r')
 #     print(data)# lat(324), lon(432)
     var = data["barra"][:]
@@ -65,7 +65,7 @@ def read_barra_data_fc(root_dir,date_time):
     return var
 
 def read_barra_data_fc_get_lat_lon(root_dir,date_time):
-    filename=root_dir+date_time.strftime("%Y%m%d")+".nc"
+    filename=root_dir+(date_time+timedelta(1)).strftime("%Y%m%d")+".nc"
     data = Dataset(filename, 'r')
     lats = data['lat'][:]
     lons = data['lon'][:]

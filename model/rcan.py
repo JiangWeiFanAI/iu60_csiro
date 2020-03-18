@@ -94,8 +94,15 @@ class RCAN(nn.Module):
 # #             print('Use DIVFlickr2K mean (0.4690, 0.4490, 0.4036)')
 #             rgb_mean = (0.4690, 0.4490, 0.4036)
 # pr,tasmax,zg
+
+
         rgb_mean = (0.05978163, 0.74509996, 0.496839)
         rgb_std = [0.0536327,0.15245515,0.22008954]
+        if args.channels==1:
+            rgb_mean = (0.05978163, 0.05978163, 0.05978163)
+            rgb_std = [0.0536327,0.0536327,0.0536327]
+
+
 
         self.sub_mean_my = common.MeanShift(args.rgb_range, rgb_mean, rgb_std,3)
         

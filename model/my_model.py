@@ -19,9 +19,9 @@ class Modify_RCAN(nn.Module):
 #         self.tail=net.model.tail
         modules_head = [common.default_conv(args.channels, args.n_feats, kernel_size)]
             
-        rgb_mean_pr=[0.004534]
+        rgb_mean_pr=[0.00216697]
         rgb_std_pr = [1.0]
-        self.sub_mean_pr = common.MeanShift(600, rgb_mean_pr, rgb_std_pr,1)
+        self.sub_mean_pr = common.MeanShift(993.9646, rgb_mean_pr, rgb_std_pr,1)
     
     
     
@@ -32,7 +32,7 @@ class Modify_RCAN(nn.Module):
                 common.default_conv(args.n_feats, args.channels, kernel_size)
 
             ]
-            self.add_mean = common.MeanShift(500, rgb_mean_pr, rgb_std_pr,args.channels,1)
+            self.add_mean = common.MeanShift(993.9646, rgb_mean_pr, rgb_std_pr,args.channels,1)
         else:
             modules_tail = [
             common.Upsampler(common.default_conv, args.scale[0],args.n_feats, act=False),
@@ -63,13 +63,13 @@ class Modify_RCAN(nn.Module):
         self.sub_mean_psl = common.MeanShift(103005.8125, rgb_mean_psl, rgb_std_psl,1) 
  ########################################################################################
 
-        rgb_mean_zg=[0.04429504,0.04453959, 0.04467554, 0.04476025 ,0.04485082 ,0.04495631,0.04496927, 0.04500141, 0.04497658, 0.04496762, 0.04475294, 0.04429719,0.04421607, 0.04418965, 0.04413029, 0.04394101, 0.04353212 ,0.04325647,0.04286277, 0.04167133 ,0.03755078, 0.01161219]#22dim
-        rgb_std_zg = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
-        self.sub_mean_zg = common.MeanShift(49000., rgb_mean_zg, rgb_std_zg,22) 
+        rgb_mean_zg= [0.88989586]
+        rgb_std_zg = [1.]
+        self.sub_mean_zg = common.MeanShift(1693.5935, rgb_mean_zg, rgb_std_zg,1) 
         
-        rgb_mean_tasmax=[0.8990] 
+        rgb_mean_tasmax=[0.8674892] 
         rgb_std_tasmax = [1.0]
-        self.sub_mean_tasmax = common.MeanShift(340, rgb_mean_tasmax, rgb_std_tasmax,1)
+        self.sub_mean_tasmax = common.MeanShift(41.89, rgb_mean_tasmax, rgb_std_tasmax,1)
         
         rgb_mean_tasmin=[0.964896]
         rgb_std_tasmin = [1.0]

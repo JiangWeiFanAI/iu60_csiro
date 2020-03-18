@@ -117,7 +117,7 @@ parser.add_argument('--scale', default='4',
 parser.add_argument('--patch_size', type=int, default=96,
                     help='output patch size')
 #??????????????????????????????????????????????????
-parser.add_argument('--rgb_range', type=int, default=400,
+parser.add_argument('--rgb_range', type=int, default=255,
                     help='maximum value of RGB')
 parser.add_argument('--n_colors', type=int, default=1,
                     help='number of color channels to use')
@@ -132,7 +132,7 @@ parser.add_argument('--model', default='RCAN',
 
 parser.add_argument('--act', type=str, default='relu',
                     help='activation function')
-parser.add_argument('--pre_train', type=str, default='./model/RCAN_BIX4.pt',
+parser.add_argument('--pre_train', type=str, default='.',
                     help='pre-trained model directory')
 parser.add_argument('--extend', type=str, default='.',
                     help='pre-trained model directory')
@@ -158,7 +158,7 @@ parser.add_argument('--test_every', type=int, default=1000,
                     help='do test per every N batches')
 parser.add_argument('--epochs', type=int, default=300,
                     help='number of epochs to train')
-parser.add_argument('--batch_size', type=int, default=8,
+parser.add_argument('--batch_size', type=int, default=16,
                     help='input batch size for training')
 parser.add_argument('--split_batch', type=int, default=1,
                     help='split the batch into smaller chunks')

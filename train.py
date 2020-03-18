@@ -2,7 +2,7 @@ import os
 import data_processing_tool as dpt
 from datetime import timedelta, date, datetime
 from args_parameter import args
-from PrepareData import ACCESS_BARRA_v2_0
+from PrepareData import ACCESS_BARRA_v2_0,ACCESS_BARRA_v2_1
 import torch
 import torch,os,torchvision
 import torch.nn as nn
@@ -111,7 +111,9 @@ def main():
     #     transforms.Normalize(IMG_MEAN, IMG_STD)
     ])
 
-    data_set=ACCESS_BARRA_v2_0(start_date,end_date,transform=train_transforms,args=args)
+#     data_set=ACCESS_BARRA_v2_0(start_date,end_date,transform=train_transforms,args=args)
+    data_set=ACCESS_BARRA_v2_1(start_date,end_date,transform=train_transforms,args=args)
+
     train_data,val_data=random_split(data_set,[int(len(data_set)*0.8),len(data_set)-int(len(data_set)*0.8)])
 
 
@@ -145,7 +147,7 @@ def main():
     checkpoint = utility.checkpoint(args)
     net = model.Model(args, checkpoint)
 #     net.load("./model/RCAN_BIX4.pt", pre_train="./model/RCAN_BIX4.pt", resume=args.resume, cpu=True)
-#     my_net=my_model.Modify_RCAN(net,args,checkpoint)
+    my_net=my_model.Modify_RCAN(net,args,checkpoint)
 
 #     net.load("./model/RCAN_BIX4.pt", pre_train="./model/RCAN_BIX4.pt", resume=args.resume, cpu=args.cpu)
     
@@ -183,21 +185,22 @@ def main():
     max_error=np.inf
     for e in range(args.epochs):
         #train
+        scheduler.step()
         net.train()
         loss=0
         start=time.time()
-        for batch, (lr,hr,_,_) in enumerate(train_dataloders):
+        for batch, (pr,hr,_,_) in enumerate(train_dataloders):
             write_log("Train for batch %d,data loading time cost %f s"%(batch,start-time.time()))
             start=time.time()
-            lr,hr= prepare([lr,hr])
+            pr,hr= prepare([pr,hr])
 
             optimizer_my.zero_grad()
             with torch.set_grad_enabled(True):
-                sr = net(lr,0)[:,[0]]
-                running_loss =criterion(sr[0], hr)
-
+                sr = net(pr,0)
+                running_loss =criterion(sr, hr)
                 running_loss.backward()
                 optimizer_my.step()
+                
             loss+=running_loss #.copy()?
             if batch%10==0:
                 state = {'model': net.state_dict(), 'optimizer': optimizer_my.state_dict(), 'epoch': e}
@@ -214,7 +217,7 @@ def main():
 #             tqdm_val = tqdm(val_dataloders, ncols=80)
             for idx_img, (lr,hr,_,_) in enumerate(val_dataloders):
                 lr,hr = prepare([lr, hr])
-                sr = net(lr,0)[:,[0]]
+                sr = net(lr,0)
                 val_loss=criterion(sr, hr)
                 for ssr,hhr in zip(sr,hr):
                     eval_psnr+=compare_psnr(ssr[0].cpu().numpy(),hhr[0].cpu().numpy(),data_range=(hhr[0].cpu().max()-hhr[0].cpu().min()).item() )
@@ -234,6 +237,7 @@ def main():
 #                   loss.item()/len(train_data),
 #                   val_loss
 #              ))
+
         if running_loss<max_error:
             max_error=running_loss
     #         torch.save(net,train_loss"_"+str(e)+".pkl")
@@ -242,6 +246,8 @@ def main():
             write_log("saving")
             state = {'model': net.state_dict(), 'optimizer': optimizer_my.state_dict(), 'epoch': e}
             torch.save(state, "./model/save/temp01/"+str(e)+".pth")
+            
+        scheduler.step()
 
 
 
