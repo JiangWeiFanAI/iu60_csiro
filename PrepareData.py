@@ -193,8 +193,8 @@ class ACCESS_BARRA_v2_1(Dataset):
         if self.args.tasmin:
             lr_tasmin=dpt.read_access_data(self.file_ACCESS_dir,en,access_date,time_leading,"tasmin")
             
-        if self.args.channels==1:
-            lr=np.repeat(lr,3,axis=2)
+#         if self.args.channels==1:
+#             lr=np.repeat(lr,3,axis=2)
          
         if self.transform:#channel 数量需要整理！！
             if self.args.channels==1:

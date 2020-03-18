@@ -98,7 +98,7 @@ def main():
     print("  ------------------------------")
     print("  batch_size     | %5d"%args.batch_size)
     print("  ------------------------------")
-    print("  using cpu only？ | %5d"%args.cpu)
+    print("  using cpu only | %5d"%args.cpu)
 
     ############################################################################################
 
@@ -147,11 +147,11 @@ def main():
     checkpoint = utility.checkpoint(args)
     net = model.Model(args, checkpoint)
 #     net.load("./model/RCAN_BIX4.pt", pre_train="./model/RCAN_BIX4.pt", resume=args.resume, cpu=True)
-    my_net=my_model.Modify_RCAN(net,args,checkpoint)
+    net=my_model.Modify_RCAN(net,args,checkpoint)
 
 #     net.load("./model/RCAN_BIX4.pt", pre_train="./model/RCAN_BIX4.pt", resume=args.resume, cpu=args.cpu)
     
-    args.lr=0.00001
+    args.lr=0.0000001
     criterion = nn.L1Loss()
     optimizer_my = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9)
     # scheduler = optim.lr_scheduler.StepLR(optimizer_my, step_size=7, gamma=0.1)
