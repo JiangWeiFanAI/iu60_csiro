@@ -64,9 +64,9 @@ class Model(nn.Module):
             return self.model
             return self.model.module
 
-    def state_dict(self, **kwargs):
-        target = self.get_model()
-        return target.state_dict(**kwargs)
+#     def state_dict(self, **kwargs):
+#         target = self.get_model()
+#         return target.state_dict(**kwargs)
 
     def save(self, apath, epoch, is_best=False):
         target = self.get_model()

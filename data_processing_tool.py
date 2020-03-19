@@ -99,7 +99,7 @@ def read_dem(filename):
     dem_np=dem_np.transpose(1,2,0)
     return dem_np
 
-def add_lat_lon(data,domian=[112.9, 154.00, -43.7425, -9.0],xarray=True):
+def add_lat_lon(data,domian=[112.9, 154.25, -43.7425, -9.0],xarray=True):
     "data: is the something you want to add lat and lon, with first demenstion is lat,second dimention is lon,domain is DEM domain "
     new_lon=np.linspace(domian[0],domian[1],data.shape[1])
     new_lat=np.linspace(domian[2],domian[3],data.shape[0])
@@ -107,7 +107,48 @@ def add_lat_lon(data,domian=[112.9, 154.00, -43.7425, -9.0],xarray=True):
         return xr.DataArray(data[:,:,0],coords=[new_lat,new_lon],dims=["lat","lon"])
     else:
         return data,new_lat,new_lon
+    
+def add_lat_lon_data(data,domain=[112.9, 154.00, -43.7425, -9.0],xarray=True):
+    "data: is the something you want to add lat and lon, with first demenstion is lat,second dimention is lon,domain is DEM domain "
+    new_lon=np.linspace(domain[0],domain[1],data.shape[1])
+    new_lat=np.linspace(domain[2],domain[3],data.shape[0])
+    if xarray:
+        return xr.DataArray(data,coords=[new_lat,new_lon],dims=["lat","lon"])
+    else:
+        return data,new_lat,new_lon
+    
 
+def map_aust_old(data, lat=None, lon=None,domain = [112.9, 154.25, -43.7425, -9.0],xrarray=True):
+    '''
+    domain=[111.975, 156.275, -44.525, -9.975]
+    domain = [111.85, 156.275, -44.35, -9.975]for can be divide by 4
+    xarray boolean :the out put data is xrray or not
+    '''
+    if str(type(data))=="<class 'xarray.core.dataarray.DataArray'>":
+        da=data.data
+        lat=data.lat.data
+        lon=data.lon.data
+    else:
+        da=data
+        
+#     if domain==None:
+#         domain = [111.85, 156.275, -44.35, -9.975]
+    a = np.logical_and(lon>=domain[0], lon<=domain[1])
+    b = np.logical_and(lat>=domain[2], lat<=domain[3])
+    da=da[b,:][:,a].copy()
+    llons, llats=lon[a], lat[b] # 将维度按照 x,y 横向竖向
+    if str(type(data))=="<class 'xarray.core.dataarray.DataArray'>" and xrarray:
+        return xr.DataArray(da,coords=[llats,llons],dims=["lat","lon"])
+    else:
+        return da
+        
+    
+    return da,llats,llons
+    
+    
+    
+    
+    
 
 def draw_aus(var,lat,lon,domain = [112.9, 154.25, -43.7425, -9.0], level="day" ,titles_on = True, title = "BARRA-R precipitation", colormap = prcp_colormap, cmap_label = "Precipitation (mm)",save=False,path=""):
     """ basema_ploting .py

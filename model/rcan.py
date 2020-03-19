@@ -97,14 +97,14 @@ class RCAN(nn.Module):
 
 
         rgb_mean = (0.05978163, 0.74509996, 0.496839)
-        rgb_std = [0.0536327,0.15245515,0.22008954]
+        rgb_std = [1.0,1.0,1.0]
         if args.channels==1:
             rgb_mean = (0.05978163, 0.05978163, 0.05978163)
-            rgb_std = [0.0536327,0.0536327,0.0536327]
+            rgb_std =  [1.0,1.0,1.0]
 
 
 
-        self.sub_mean_my = common.MeanShift(args.rgb_range, rgb_mean, rgb_std,3)
+        self.sub_mean_my = common.MeanShift(993.9646, rgb_mean, rgb_std,3)
         
         # define head module
 #         modules_head = [conv(args.n_colors, n_feats, kernel_size)]
@@ -145,31 +145,31 @@ class RCAN(nn.Module):
 
         return x 
 
-    def load_state_dict(self, state_dict, strict=False):
-        own_state = self.state_dict()
-        for name, param in state_dict.items():
-            if name in own_state:
-                if isinstance(param, nn.Parameter):
-                    param = param.data
-                try:
-                    own_state[name].copy_(param)
-                except Exception:
-                    if name.find('tail') >= 0:
-                        print('Replace pre-trained upsampler to new one...')
-                    else:
-                        raise RuntimeError('While copying the parameter named {}, '
-                                           'whose dimensions in the model are {} and '
-                                           'whose dimensions in the checkpoint are {}.'
-                                           .format(name, own_state[name].size(), param.size()))
-            elif strict:
-                if name.find('tail') == -1:
-                    raise KeyError('unexpected key "{}" in state_dict'
-                                   .format(name))
+#     def load_state_dict(self, state_dict, strict=False):
+#         own_state = self.state_dict()
+#         for name, param in state_dict.items():
+#             if name in own_state:
+#                 if isinstance(param, nn.Parameter):
+#                     param = param.data
+#                 try:
+#                     own_state[name].copy_(param)
+#                 except Exception:
+#                     if name.find('tail') >= 0:
+#                         print('Replace pre-trained upsampler to new one...')
+#                     else:
+#                         raise RuntimeError('While copying the parameter named {}, '
+#                                            'whose dimensions in the model are {} and '
+#                                            'whose dimensions in the checkpoint are {}.'
+#                                            .format(name, own_state[name].size(), param.size()))
+#             elif strict:
+#                 if name.find('tail') == -1:
+#                     raise KeyError('unexpected key "{}" in state_dict'
+#                                    .format(name))
 
-        if strict:
-            missing = set(own_state.keys()) - set(state_dict.keys())
-            if len(missing) > 0:
-                raise KeyError('missing keys in state_dict: "{}"'.format(missing))
+#         if strict:
+#             missing = set(own_state.keys()) - set(state_dict.keys())
+#             if len(missing) > 0:
+#                 raise KeyError('missing keys in state_dict: "{}"'.format(missing))
 
 
 

@@ -1,8 +1,9 @@
+#pr dem chennel
 import os
 import data_processing_tool as dpt
 from datetime import timedelta, date, datetime
 from args_parameter import args
-from PrepareData import ACCESS_BARRA_v2_0,ACCESS_BARRA_v2_1
+from PrepareData import ACCESS_BARRA_v2_0,ACCESS_BARRA_v2_1,ACCESS_BARRA_v2_pr_dem
 import torch
 import torch,os,torchvision
 import torch.nn as nn
@@ -32,6 +33,8 @@ from torch.autograd import Variable
 
 def write_log(log):
     print(log)
+    if not os.path.exists("./model/save/"+args.train_name+"/"):
+        os.mkdir("./model/save/"+args.train_name+"/")
     my_log_file=open("./model/save/"+args.train_name + '/train.txt', 'a')
 #     log="Train for batch %d,data loading time cost %f s"%(batch,start-time.time())
     my_log_file.write(log + '\n')
@@ -43,7 +46,6 @@ def main():
     
 #     pre_train_path="./model/save/temp01/"+0+".pth"
 
-    
     
     init_date=date(1970, 1, 1)
     start_date=date(1990, 1, 2)
@@ -98,7 +100,7 @@ def main():
     print("  ------------------------------")
     print("  batch_size     | %5d"%args.batch_size)
     print("  ------------------------------")
-    print("  using cpu only | %5d"%args.cpu)
+    print("  using cpu only？ | %5d"%args.cpu)
 
     ############################################################################################
 
@@ -112,7 +114,7 @@ def main():
     ])
 
 #     data_set=ACCESS_BARRA_v2_0(start_date,end_date,transform=train_transforms,args=args)
-    data_set=ACCESS_BARRA_v2_1(start_date,end_date,transform=train_transforms,args=args)
+    data_set=ACCESS_BARRA_v2_pr_dem(start_date,end_date,transform=train_transforms,args=args)
 
     train_data,val_data=random_split(data_set,[int(len(data_set)*0.8),len(data_set)-int(len(data_set)*0.8)])
 
@@ -151,7 +153,7 @@ def main():
 
 #     net.load("./model/RCAN_BIX4.pt", pre_train="./model/RCAN_BIX4.pt", resume=args.resume, cpu=args.cpu)
     
-    args.lr=0.0000001
+    args.lr=0.00001
     criterion = nn.L1Loss()
     optimizer_my = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9)
     # scheduler = optim.lr_scheduler.StepLR(optimizer_my, step_size=7, gamma=0.1)
@@ -172,7 +174,8 @@ def main():
     if torch.cuda.device_count() > 1:
         write_log("Let's use"+str(torch.cuda.device_count())+"GPUs!")
         # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
-        net = nn.DataParallel(net)
+        net = nn.DataParallel(net,range(torch.cuda.device_count()))
+
     else:
         write_log("Let's use"+str(torch.cuda.device_count())+"GPUs!")
 
@@ -189,23 +192,25 @@ def main():
         net.train()
         loss=0
         start=time.time()
-        for batch, (pr,hr,_,_) in enumerate(train_dataloders):
-            write_log("Train for batch %d,data loading time cost %f s"%(batch,start-time.time()))
+        for batch, (pr,dem,hr,_,_) in enumerate(train_dataloders):
+            
             start=time.time()
-            pr,hr= prepare([pr,hr])
+            pr,dem,hr= prepare([pr,dem,hr])
 
             optimizer_my.zero_grad()
             with torch.set_grad_enabled(True):
-                sr = net(pr,0)
+                sr = net(pr,dem,0)
                 running_loss =criterion(sr, hr)
                 running_loss.backward()
                 optimizer_my.step()
                 
             loss+=running_loss #.copy()?
             if batch%10==0:
+                if not os.path.exists("./model/save/"+args.train_name):
+                    os.mkdir("./model/save/"+args.train_name)
                 state = {'model': net.state_dict(), 'optimizer': optimizer_my.state_dict(), 'epoch': e}
-                torch.save(state, "./model/save/temp01/last.pth")
-            write_log("Train done,train time cost %f s,loss: %f"%(start-time.time(),running_loss.item()  ))
+                torch.save(state, "./model/save/"+args.train_name+"/last.pth")
+                write_log("Train done,train time cost %f s,loss: %f"%(start-time.time(),running_loss.item()  ))
             start=time.time()
 
         #validation
@@ -215,9 +220,9 @@ def main():
             eval_psnr=0
             eval_ssim=0
 #             tqdm_val = tqdm(val_dataloders, ncols=80)
-            for idx_img, (lr,hr,_,_) in enumerate(val_dataloders):
-                lr,hr = prepare([lr, hr])
-                sr = net(lr,0)
+            for idx_img, (lr,dem,hr,_,_) in enumerate(val_dataloders):
+                lr,dem,hr = prepare([lr,dem,hr])
+                sr = net(lr,dem,0)
                 val_loss=criterion(sr, hr)
                 for ssr,hhr in zip(sr,hr):
                     eval_psnr+=compare_psnr(ssr[0].cpu().numpy(),hhr[0].cpu().numpy(),data_range=(hhr[0].cpu().max()-hhr[0].cpu().min()).item() )
@@ -250,10 +255,11 @@ def main():
         scheduler.step()
 
 
-
             
 if __name__=='__main__':
     main()
+            
+
 
 
 

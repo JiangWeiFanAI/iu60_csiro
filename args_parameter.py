@@ -1,8 +1,8 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='BARRA_R and ACCESS-S!')
-parser.add_argument('--args_test', type=int, default=0,
-                        help='testing parameters input')
+parser.add_argument('--prprpr', action='store_true',
+                    help='Enables debug mode')
 parser.add_argument('--debug', action='store_true',
                     help='Enables debug mode')
 parser.add_argument('--template', default='.',
@@ -132,6 +132,9 @@ parser.add_argument('--model', default='RCAN',
 
 parser.add_argument('--act', type=str, default='relu',
                     help='activation function')
+parser.add_argument('--continue_train', type=str, default='.',
+                    help='pre-trained model directory')
+
 parser.add_argument('--pre_train', type=str, default='.',
                     help='pre-trained model directory')
 parser.add_argument('--extend', type=str, default='.',
